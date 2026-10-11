@@ -1,7 +1,7 @@
 # EXIT TICKET: LIGJËRATA 1
 
-**Emri dhe Mbiemri:** Amar Pantina
-**ID e Studentit:**   RE-78538/24
+**Emri dhe Mbiemri:** Amar Pantina  
+**ID e Studentit:** RE-78538/24  
 **Email Zyrtar AAB:** amar.pantina@universitetiaab.com
 
 ### Pyetja 1: Problemi i Vëzhguar
@@ -15,4 +15,3 @@ Ky problem i prek më së shumti studentët dhe personat që udhëtojnë çdo di
 ### Pyetja 3: Kufizimi i MVP-së (Out of Scope)
 
 Pagesat online brenda aplikacionit do të përjashtohen nga MVP-ja e këtij semestri. Fillimisht, aplikacioni do të fokusohet në publikimin, kërkimin dhe rezervimin e udhëtimeve, ndërsa pagesat online mund të shtohen në një version të ardhshëm.
-
