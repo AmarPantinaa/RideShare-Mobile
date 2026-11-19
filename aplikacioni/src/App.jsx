@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
-// 1. Lista e vetme e të dhënave (3 udhëtime fiktive)
+const tekstVende = (n) =>
+  n === 0 ? "Nuk ka vende" : n === 1 ? "1 vend i lirë" : `${n} vende të lira`;
+
+// Udhëtimet vijnë nga databaza Neon përmes /api/udhetimet
 function useUdhetimet() {
   const [gjendja, setGjendja] = useState({ ngarkim: true, gabim: false, lista: [] });
   useEffect(() => {
@@ -12,12 +15,12 @@ function useUdhetimet() {
       })
       .then((lista) => !anuluar && setGjendja({ ngarkim: false, gabim: false, lista }))
       .catch(() => !anuluar && setGjendja({ ngarkim: false, gabim: true, lista: [] }));
-    return () => { anuluar = true; };
+    return () => {
+      anuluar = true;
+    };
   }, []);
   return gjendja;
 }
-const tekstVende = (n) =>
-  n === 0 ? "Nuk ka vende" : n === 1 ? "1 vend i lirë" : `${n} vende të lira`;
 
 // Adresa lexohet nga hash-i: #/  ,  #/udhetimi/2  ,  #/udhetimi/2/pritje
 function useRruga() {
@@ -29,6 +32,7 @@ function useRruga() {
   }, []);
   return hash.replace(/^#\/?/, "").split("/").filter(Boolean);
 }
+
 function Lista({ udhetimet }) {
   return (
     <>
@@ -102,6 +106,16 @@ function NukGjendet() {
   );
 }
 
+function Gabim() {
+  return (
+    <>
+      <h1>Nuk u ngarkuan udhëtimet</h1>
+      <p className="sub">Provo përsëri pas pak.</p>
+      <a href="#/" onClick={() => window.location.reload()} className="back">Provo përsëri</a>
+    </>
+  );
+}
+
 export default function App() {
   const [a, id, c] = useRruga();
   const { ngarkim, gabim, lista: udhetimet } = useUdhetimet();
@@ -114,7 +128,14 @@ export default function App() {
   } else if (!a) {
     faqja = <Lista udhetimet={udhetimet} />;
   } else if (a === "udhetimi" && id) {
-    // pjesa tjetër mbetet saktësisht siç është
+    const u = udhetimet.find((x) => x.id === id);
+    if (!u) faqja = <NukGjendet />;
+    else if (c === "pritje") faqja = u.vende > 0 ? <Pritje u={u} /> : <NukGjendet />;
+    else if (!c) faqja = <Detajet u={u} />;
+    else faqja = <NukGjendet />;
+  } else {
+    faqja = <NukGjendet />;
+  }
 
   return (
     <div className="app">
@@ -142,13 +163,3 @@ h1{margin:0;font-size:26px;font-weight:800;line-height:1.15}
 .primary.disabled{background:#b9c7e0}
 .simulation{background:#fff3d6;color:#8a5a00;border:1px dashed #d9a400;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:700}
 `;
-
-function Gabim() {
-  return (
-    <>
-      <h1>Nuk u ngarkuan udhëtimet</h1>
-      <p className="sub">Provo përsëri pas pak.</p>
-      <a href="#/" onClick={() => window.location.reload()} className="back">Provo përsëri</a>
-    </>
-  );
-} }
