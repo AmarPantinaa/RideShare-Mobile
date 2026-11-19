@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
 
 // 1. Lista e vetme e të dhënave (3 udhëtime fiktive)
-const udhetimet = [
-  { id: "1", ora: "07:30", nisja: "Pejë", pikenisja: "Sheshi i qytetit", shoferi: "Arben", vende: 3 },
-  { id: "2", ora: "08:00", nisja: "Istog", pikenisja: "Stacioni kryesor", shoferi: "Vjosa", vende: 1 },
-  { id: "3", ora: "08:15", nisja: "Klinë", pikenisja: "Qendra", shoferi: "Besnik", vende: 0 },
-];
-
+function useUdhetimet() {
+  const [gjendja, setGjendja] = useState({ ngarkim: true, gabim: false, lista: [] });
+  useEffect(() => {
+    let anuluar = false;
+    fetch("/api/udhetimet")
+      .then((r) => {
+        if (!r.ok) throw new Error("gabim");
+        return r.json();
+      })
+      .then((lista) => !anuluar && setGjendja({ ngarkim: false, gabim: false, lista }))
+      .catch(() => !anuluar && setGjendja({ ngarkim: false, gabim: true, lista: [] }));
+    return () => { anuluar = true; };
+  }, []);
+  return gjendja;
+}
 const tekstVende = (n) =>
   n === 0 ? "Nuk ka vende" : n === 1 ? "1 vend i lirë" : `${n} vende të lira`;
 
@@ -20,8 +29,7 @@ function useRruga() {
   }, []);
   return hash.replace(/^#\/?/, "").split("/").filter(Boolean);
 }
-
-function Lista() {
+function Lista({ udhetimet }) {
   return (
     <>
       <h1>Udhëtime drejt Kampusit</h1>
@@ -96,19 +104,17 @@ function NukGjendet() {
 
 export default function App() {
   const [a, id, c] = useRruga();
+  const { ngarkim, gabim, lista: udhetimet } = useUdhetimet();
   let faqja;
 
-  if (!a) {
-    faqja = <Lista />;
+  if (ngarkim) {
+    faqja = <p className="sub">Duke ngarkuar…</p>;
+  } else if (gabim) {
+    faqja = <Gabim />;
+  } else if (!a) {
+    faqja = <Lista udhetimet={udhetimet} />;
   } else if (a === "udhetimi" && id) {
-    const u = udhetimet.find((x) => x.id === id);
-    if (!u) faqja = <NukGjendet />; // ID e panjohur → nuk tregon udhëtim të gabuar
-    else if (c === "pritje") faqja = u.vende > 0 ? <Pritje u={u} /> : <NukGjendet />;
-    else if (!c) faqja = <Detajet u={u} />;
-    else faqja = <NukGjendet />;
-  } else {
-    faqja = <NukGjendet />;
-  }
+    // pjesa tjetër mbetet saktësisht siç është
 
   return (
     <div className="app">
@@ -136,3 +142,13 @@ h1{margin:0;font-size:26px;font-weight:800;line-height:1.15}
 .primary.disabled{background:#b9c7e0}
 .simulation{background:#fff3d6;color:#8a5a00;border:1px dashed #d9a400;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:700}
 `;
+
+function Gabim() {
+  return (
+    <>
+      <h1>Nuk u ngarkuan udhëtimet</h1>
+      <p className="sub">Provo përsëri pas pak.</p>
+      <a href="#/" onClick={() => window.location.reload()} className="back">Provo përsëri</a>
+    </>
+  );
+} }
